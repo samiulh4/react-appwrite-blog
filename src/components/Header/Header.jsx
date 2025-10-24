@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -9,24 +10,20 @@ const Header = () => {
             <nav className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <a href="/" className="text-2xl font-bold text-gray-800">
+                        <Link to="/" className="text-2xl font-bold text-gray-800">
                             Blog App
-                        </a>
+                        </Link>
                     </div>
 
                     <div className="hidden md:flex space-x-6">
-                        <a href="/" className="text-gray-600 hover:text-gray-900">Home</a>
-                        <a href="/posts" className="text-gray-600 hover:text-gray-900">Posts</a>
-                        <a href="/about" className="text-gray-600 hover:text-gray-900">About</a>
+                        <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
+                        <Link to="/posts" className="text-gray-600 hover:text-gray-900">Posts</Link>
+                        <Link to="/about" className="text-gray-600 hover:text-gray-900">About</Link>
                     </div>
 
                     <div className="flex items-center space-x-4">
-                         <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
-                                    Login
-                                </button>
-                                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                    Sign Up
-                                </button>
+                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signin">Sign In</Link>
+                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signup">Sign Up</Link>
                         {!isLoggedIn ? (
                             <>
                                 <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">

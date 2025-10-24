@@ -1,5 +1,6 @@
-import UserImage from '../assets/user.png';
-import CoverImage from '../assets/cover.webp';
+import UserImage from '../../assets/user.png';
+import CoverImage from '../../assets/cover.webp';
+import { Link } from 'react-router-dom';
 
 
 const ArticleCard = (props) => {
@@ -18,7 +19,7 @@ const ArticleCard = (props) => {
                     <span className="ml-3 text-sm text-gray-500">5 min read</span>
                 </div>
                 <h3 className="mt-3 text-xl font-semibold text-gray-900 hover:text-blue-600">
-                    { props.title }
+                    <Link to={`/article/1`}>{ props.title }</Link>
                 </h3>
                 <p className="mt-2 text-gray-600 line-clamp-2">
                     { props.content }
