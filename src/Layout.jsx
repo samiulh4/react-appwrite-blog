@@ -1,6 +1,6 @@
-import Header from "../components/Header/Header"
-import Footer from "../components/Footer/Footer"
-import SidebarRight from "../components/Sidebar/SidebarRight"
+import Header from "./components/Header/Header"
+import Footer from "./components/Footer/Footer"
+import SidebarRight from "./components/Sidebar/SidebarRight"
 import { Outlet } from "react-router-dom"
 
 const Layout = () => {
