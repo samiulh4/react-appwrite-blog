@@ -1,5 +1,5 @@
-import UserImage from '../assets/user.png';
-import CoverImage from '../assets/cover.webp';
+import UserImage from '../../assets/user.png';
+import CoverImage from '../../assets/cover.webp';
 
 
 const ArticleCard = (props) => {

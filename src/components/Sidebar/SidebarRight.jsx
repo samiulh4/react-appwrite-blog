@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Sidebar = () => {
+const SidebarRight = () => {
     const [recentPosts] = useState([
         { id: 1, title: 'Getting Started with React', date: '2025-10-20' },
         { id: 2, title: 'Understanding Modern Web Development', date: '2025-10-18' },
@@ -49,4 +49,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar;
+export default SidebarRight;
