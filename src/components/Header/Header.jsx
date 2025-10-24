@@ -22,12 +22,8 @@ const Header = () => {
                     </div>
 
                     <div className="flex items-center space-x-4">
-                         <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
-                                    Login
-                                </button>
-                                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                    Sign Up
-                                </button>
+                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signin">Sign In</Link>
+                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signup">Sign Up</Link>
                         {!isLoggedIn ? (
                             <>
                                 <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
