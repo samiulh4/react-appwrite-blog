@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import Swal from 'sweetalert2';
 import appWriteService from '../services/AppWriteService';
+
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
@@ -19,15 +21,44 @@ const SignUp = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+
+            Swal.fire({
+                title: 'Creating your account...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             const userData = await appWriteService.createAccount(formData);
 
+            Swal.close();
+
             if (userData) {
-                alert("Account created successfully!");
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Account created successfully!',
+                    confirmButtonColor: '#3085d6',
+                });
             } else {
-                alert("Failed to create account.");
+
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to create account.',
+                    confirmButtonColor: '#d33',
+                });
             }
-        } catch (erro) {
-            console.log("Error creating account:", erro);
+        } catch (error) {
+            Swal.close();
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error creating account',
+                confirmButtonColor: '#d33',
+            });
         } finally {
             setFormData({
                 name: '',
