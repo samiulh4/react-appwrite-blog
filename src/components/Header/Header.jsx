@@ -17,7 +17,7 @@ const Header = () => {
 
         };
         checkUserLoggedIn();
-    }, [])
+    }, [isLoggedIn])
 
     return (
         <header className="bg-white shadow-lg">
@@ -31,8 +31,11 @@ const Header = () => {
 
                     <div className="hidden md:flex space-x-6">
                         <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
-                        <Link to="/posts" className="text-gray-600 hover:text-gray-900">Posts</Link>
                         <Link to="/about" className="text-gray-600 hover:text-gray-900">About</Link>
+                        <Link to="/posts" className="text-gray-600 hover:text-gray-900">Posts</Link>
+                        {isLoggedIn && (
+                            <Link to="/article/add" className="text-blue-600 hover:text-blue-900">New Article</Link>
+                        )}
                     </div>
 
                     <div className="flex items-center space-x-4">

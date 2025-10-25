@@ -1,15 +1,16 @@
 import UserImage from '../../assets/user.png';
 import CoverImage from '../../assets/cover.webp';
 import { Link } from 'react-router-dom';
+import appWriteService from '../../services/AppWriteService';
 
 
-const ArticleCard = (props) => {
+const ArticleCard = ({$id, title, content}) => {
     return (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <img
                 className="h-48 w-full object-cover"
                 src={CoverImage}
-                alt="Blog post"
+                alt="Featured Image"
             />
             <div className="p-6">
                 <div className="flex items-center">
@@ -19,10 +20,10 @@ const ArticleCard = (props) => {
                     <span className="ml-3 text-sm text-gray-500">5 min read</span>
                 </div>
                 <h3 className="mt-3 text-xl font-semibold text-gray-900 hover:text-blue-600">
-                    <Link to={`/article/1`}>{ props.title }</Link>
+                    <Link to={`/article/${$id}`}>{ title }</Link>
                 </h3>
                 <p className="mt-2 text-gray-600 line-clamp-2">
-                    { props.content }
+                    { content }
                 </p>
                 <div className="mt-4 flex items-center">
                     <img
@@ -31,7 +32,7 @@ const ArticleCard = (props) => {
                         alt="Author"
                     />
                     <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">{props.author}</p>
+                        <p className="text-sm font-medium text-gray-900">author</p>
                         <p className="text-xs text-gray-500">Oct 20, 2025</p>
                     </div>
                 </div>
