@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import appWriteService from '../services/AppWriteService';
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
@@ -15,9 +16,26 @@ const SignUp = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle registration logic here
+        try {
+            const userData = await appWriteService.createAccount(formData);
+
+            if (userData) {
+                alert("Account created successfully!");
+            } else {
+                alert("Failed to create account.");
+            }
+        } catch (erro) {
+            console.log("Error creating account:", erro);
+        } finally {
+            setFormData({
+                name: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            });
+        }
     };
 
     return (
