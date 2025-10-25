@@ -1,9 +1,23 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import appWriteService from '../../services/AppWriteService';
+import { showConfirmDialog, showSuccessAlert, showErrorAlert } from '../../utils/sweetAlert';
 
 const Header = () => {
+    const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const isLoggedIn = true; // This will be replaced with actual auth state later
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const checkUserLoggedIn = async () => {
+            const currentUser = await appWriteService.getCurrentUser();
+            if (currentUser) {
+                setIsLoggedIn(true);
+            }
+
+        };
+        checkUserLoggedIn();
+    }, [])
 
     return (
         <header className="bg-white shadow-lg">
@@ -22,16 +36,10 @@ const Header = () => {
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signin">Sign In</Link>
-                        <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signup">Sign Up</Link>
                         {!isLoggedIn ? (
                             <>
-                                <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
-                                    Login
-                                </button>
-                                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                    Sign Up
-                                </button>
+                                <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signin">Sign In</Link>
+                                <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signup">Sign Up</Link>
                             </>
                         ) : (
                             <div className="relative">
@@ -62,7 +70,24 @@ const Header = () => {
                                             Settings
                                         </a>
                                         <div className="border-t border-gray-100"></div>
-                                        <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <button
+                                            onClick={async () => {
+                                                const result = await showConfirmDialog(
+                                                    'Sign Out',
+                                                    'Are you sure you want to sign out?'
+                                                );
+                                                if (result.isConfirmed) {
+                                                    try {
+                                                        await appWriteService.logout();
+                                                        await showSuccessAlert('Success', 'Signed out successfully');
+                                                        navigate('/signin');
+                                                    } catch (error) {
+                                                        showErrorAlert('Error', 'Failed to sign out');
+                                                    }
+                                                }
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                        >
                                             Sign out
                                         </button>
                                     </div>
