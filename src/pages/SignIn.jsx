@@ -1,12 +1,55 @@
 import { useState } from 'react';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import appWriteService from '../services/AppWriteService';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle login logic here
+        try {
+
+            Swal.fire({
+                title: 'Loading...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const session = await appWriteService.login({ email, password });
+
+            Swal.close();
+
+            if (session) {
+                const currentUser = await appWriteService.getCurrentUser();
+                if (currentUser) {
+                    navigate("/");
+                }
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to login. Please check your credentials.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+
+        } catch (error) {
+            Swal.close();
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error accessing account',
+                confirmButtonColor: '#d33',
+            });
+        } finally {
+            setEmail('');
+            setPassword('');
+        }
     };
 
     return (
