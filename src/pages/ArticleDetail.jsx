@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import appWriteService from "../services/AppWriteService";
 import { formatDate } from "../utils/dateFormat";
 import CoverImage from "../assets/cover.webp";
@@ -8,18 +8,28 @@ import UserImage from "../assets/user.png";
 const ArticleDetail = () => {
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
     const { id } = useParams();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchArticle = async () => {
             try {
                 setLoading(true);
-                const response = await appWriteService.getArticle(id);
-                if (response) {
-                    setArticle(response);
+                const [articleResponse, userResponse] = await Promise.all([
+                    appWriteService.getArticle(id),
+                    appWriteService.getCurrentUser()
+                ]);
+                
+                if (articleResponse) {
+                    setArticle(articleResponse);
+                }
+                if (userResponse) {
+                    setCurrentUser(userResponse);
                 }
             } catch (error) {
-                console.error("Error fetching article:", error);
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
@@ -87,6 +97,18 @@ const ArticleDetail = () => {
                         alt="Featured"
                     />
                 </div>
+
+                {/* Author Actions */}
+                {currentUser && currentUser.$id === article.user_id && (
+                    <div className="mb-8">
+                        <button
+                            onClick={() => navigate(`/article/${id}/edit`)}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Edit Article
+                        </button>
+                    </div>
+                )}
 
                 {/* Article Content */}
                 <article className="prose prose-lg max-w-none">

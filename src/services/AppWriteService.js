@@ -88,6 +88,54 @@ export class AppWriteService {
         }
     }
 
+    async getArticle(id) {
+        try {
+            return await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                id
+            );
+        } catch (error) {
+            console.error("Error getting article:", error);
+            throw error;
+        }
+    }
+
+    async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
+        try {
+            let imageId = null;
+            /*if (featured_image && typeof featured_image !== 'string') {
+                // Only upload if it's a new file
+                const uploadedFile = await this.storage.createFile(
+                    conf.appwriteBucketId,
+                    ID.unique(),
+                    featured_image
+                );
+                imageId = uploadedFile.$id;
+            } else {
+                imageId = featured_image; // Keep existing image ID
+            }*/
+            
+            const post = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                id,
+                {
+                    title,
+                    content,
+                    featured_image: imageId,
+                    user_id,
+                    author_name
+                }
+            );
+
+            return post;
+        } catch (error) {
+            console.error("Error updating article:", error);
+            throw error;
+        }
+    }
+
     async getArticles(queries = [Query.equal("status", "active")]) {
         try {
             const finalQueries = [
