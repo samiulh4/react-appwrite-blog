@@ -6,11 +6,13 @@ import { showLoadingAlert, closeLoadingAlert, showSuccessAlert, showErrorAlert }
 const ArticleAdd = () => {
     const navigate = useNavigate();
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [currentUserName, setCurrentUserName] = useState('');
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         user_id: '',
         featured_image: null,
+        author_name: ''
     });
 
     useEffect(() => {
@@ -18,6 +20,7 @@ const ArticleAdd = () => {
             const currentUser = await appWriteService.getCurrentUser();
             if (currentUser) {
                 setCurrentUserId(currentUser.$id);
+                setCurrentUserName(currentUser.name || '');
             } else {
                 navigate('/signin');
             }
@@ -49,7 +52,8 @@ const ArticleAdd = () => {
 
             const post = await appWriteService.createPost({
                 ...formData,
-                user_id: currentUserId
+                user_id: currentUserId,
+                author_name: currentUserName
             });
 
             closeLoadingAlert();

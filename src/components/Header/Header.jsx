@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import appWriteService from '../../services/AppWriteService';
 import { showConfirmDialog, showSuccessAlert, showErrorAlert } from '../../utils/sweetAlert';
+import userImage from '../../assets/user.png';
 
 const Header = () => {
     const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [authUserName, setAuthUserName] = useState('');
 
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             const currentUser = await appWriteService.getCurrentUser();
             if (currentUser) {
                 setIsLoggedIn(true);
+                setAuthUserName(currentUser.name || 'User');
             }
 
         };
@@ -32,7 +35,6 @@ const Header = () => {
                     <div className="hidden md:flex space-x-6">
                         <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
                         <Link to="/about" className="text-gray-600 hover:text-gray-900">About</Link>
-                        <Link to="/posts" className="text-gray-600 hover:text-gray-900">Posts</Link>
                         {isLoggedIn && (
                             <Link to="/article/add" className="text-blue-600 hover:text-blue-900">New Article</Link>
                         )}
@@ -50,14 +52,14 @@ const Header = () => {
                                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                                     className="flex items-center space-x-2 focus:outline-none"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                         <img
-                                            src="https://t4.ftcdn.net/jpg/02/29/75/83/360_F_229758328_7x8jwCwjtBMmC6rgFzLFhZoEpLobB6L8.jpg"
+                                            src={userImage}
                                             alt="User Profile"
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
                                     </div>
-                                    <span className="text-gray-700">User Name</span>
+                                    <span className="text-gray-700">{authUserName}</span>
 
                                 </button>
 

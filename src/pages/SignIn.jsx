@@ -28,6 +28,13 @@ const SignIn = () => {
                 const currentUser = await appWriteService.getCurrentUser();
                 if (currentUser) {
                     navigate("/");
+                } else {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Email or phone not verified. Please contact the admin.',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             } else {
                 await Swal.fire({
