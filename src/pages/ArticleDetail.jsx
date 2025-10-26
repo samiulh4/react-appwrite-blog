@@ -1,27 +1,79 @@
-const ArticleDetails = () => {
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import appWriteService from "../services/AppWriteService";
+import { formatDate } from "../utils/dateFormat";
+import CoverImage from "../assets/cover.webp";
+import UserImage from "../assets/user.png";
+
+const ArticleDetail = () => {
+    const [article, setArticle] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const { id } = useParams();
+
+    useEffect(() => {
+        const fetchArticle = async () => {
+            try {
+                setLoading(true);
+                const response = await appWriteService.getArticle(id);
+                if (response) {
+                    setArticle(response);
+                }
+            } catch (error) {
+                console.error("Error fetching article:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchArticle();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-4xl mx-auto">
+                    <div className="animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!article) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-4xl mx-auto">
+                    <h1 className="text-2xl font-bold text-gray-900">Article not found</h1>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Article Header */}
             <div className="max-w-4xl mx-auto">
                 <div className="mb-8">
                     <span className="bg-blue-100 text-blue-600 text-sm px-4 py-1 rounded-full uppercase font-semibold tracking-wide">
-                        Technology
+                        Article
                     </span>
                     <h1 className="text-4xl font-bold mt-4 text-gray-900">
-                        Understanding Modern Web Development Practices and Principles
+                        {article.title}
                     </h1>
                     <div className="flex items-center mt-6">
                         <img
                             className="h-12 w-12 rounded-full object-cover"
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+                            src={UserImage}
                             alt="Author"
                         />
                         <div className="ml-4">
-                            <p className="text-gray-800 font-medium">John Doe</p>
+                            <p className="text-gray-800 font-medium">{article.author_name || ""}</p>
                             <div className="flex items-center text-gray-600 text-sm">
-                                <span>Oct 24, 2025</span>
+                                <span>{formatDate(article.$createdAt)}</span>
                                 <span className="mx-2">•</span>
-                                <span>8 min read</span>
+                                <span>{Math.ceil(article.content.length / 1000)} min read</span>
                             </div>
                         </div>
                     </div>
@@ -31,7 +83,7 @@ const ArticleDetails = () => {
                 <div className="mb-8">
                     <img
                         className="w-full h-[28rem] object-cover rounded-xl"
-                        src="https://images.unsplash.com/photo-1498050108023-c5249f4df085"
+                        src={CoverImage}
                         alt="Featured"
                     />
                 </div>
@@ -39,36 +91,7 @@ const ArticleDetails = () => {
                 {/* Article Content */}
                 <article className="prose prose-lg max-w-none">
                     <p>
-                        Modern web development has evolved significantly over the past few years. 
-                        With the advent of new technologies and frameworks, developers now have more 
-                        tools at their disposal than ever before.
-                    </p>
-
-                    <h2>The Evolution of Web Development</h2>
-                    <p>
-                        The landscape of web development is constantly changing. From static HTML 
-                        pages to dynamic, interactive applications, the journey has been remarkable. 
-                        Today's web applications are more powerful, more responsive, and more user-friendly 
-                        than ever before.
-                    </p>
-
-                    <h2>Key Principles to Follow</h2>
-                    <ul>
-                        <li>Responsive Design</li>
-                        <li>Performance Optimization</li>
-                        <li>Security Best Practices</li>
-                        <li>Accessibility</li>
-                    </ul>
-
-                    <blockquote>
-                        "Good code is its own best documentation. As you're about to add a comment, 
-                        ask yourself, 'How can I improve the code so that this comment isn't needed?'"
-                        <footer>- Steve McConnell</footer>
-                    </blockquote>
-
-                    <p>
-                        As we continue to push the boundaries of what's possible on the web, it's 
-                        crucial to stay updated with the latest trends and best practices.
+                        {article.content}
                     </p>
                 </article>
 
@@ -92,7 +115,7 @@ const ArticleDetails = () => {
                     <div className="flex items-center">
                         <img
                             className="h-16 w-16 rounded-full object-cover"
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
+                            src={UserImage}
                             alt="Author"
                         />
                         <div className="ml-4">
@@ -101,8 +124,8 @@ const ArticleDetails = () => {
                         </div>
                     </div>
                     <p className="mt-4 text-gray-600">
-                        John is a passionate web developer and technical writer with over 5 years 
-                        of experience in the industry. He loves sharing his knowledge and helping 
+                        John is a passionate web developer and technical writer with over 5 years
+                        of experience in the industry. He loves sharing his knowledge and helping
                         others learn about web development.
                     </p>
                 </div>
@@ -111,4 +134,4 @@ const ArticleDetails = () => {
     );
 };
 
-export default ArticleDetails;
+export default ArticleDetail;

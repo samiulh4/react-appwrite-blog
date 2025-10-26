@@ -38,15 +38,13 @@ export class AppWriteService {
             const currentUser = await this.account.get();
             if (currentUser) {
                 if (!currentUser.emailVerification && !currentUser.phoneVerification) {
-                    //throw new Error("Email or phone not verified. Please contact the admin.");
                     await this.logout();
                     return null;
                 }
                 return currentUser;
             }
         } catch (error) {
-            //throw error;
-            console.log("Appwrite service :: getCurrentUser :: error", error);
+            return null;
         }
         return null;
     }
@@ -59,7 +57,7 @@ export class AppWriteService {
         }
     }
 
-    async createPost({ title, content, featured_image, user_id }) {
+    async createPost({ title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
             /*if (featured_image) {
@@ -78,7 +76,8 @@ export class AppWriteService {
                     title,
                     content,
                     featured_image: imageId,
-                    user_id
+                    user_id,
+                    author_name
                 }
             );
 
@@ -89,20 +88,36 @@ export class AppWriteService {
         }
     }
 
-    async getPosts(queries = [Query.equal("status", "active")]) {
+    async getArticles(queries = [Query.equal("status", "active")]) {
         try {
+            const finalQueries = [
+                ...queries,
+                Query.limit(10),
+                Query.orderDesc("$updatedAt")
+            ];
             return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
-                queries
+                finalQueries
             )
         } catch (error) {
-            console.error("AppWriteService :: getPosts :: error", error);
             throw error;
         }
     }
 
-    getFilePreview(fileId){
+    async getArticle(id){
+        try {
+            return await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteCollectionId,
+                id
+            )
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    getFilePreview(fileId) {
         return this.storage.getFilePreview(
             conf.appwriteBucketId,
             fileId

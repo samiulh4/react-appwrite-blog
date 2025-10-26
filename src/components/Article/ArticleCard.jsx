@@ -2,9 +2,10 @@ import UserImage from '../../assets/user.png';
 import CoverImage from '../../assets/cover.webp';
 import { Link } from 'react-router-dom';
 import appWriteService from '../../services/AppWriteService';
+import { formatDate } from '../../utils/dateFormat';
 
 
-const ArticleCard = ({$id, title, content}) => {
+const ArticleCard = ({$id, title, content, author_name, $createdAt}) => {
     return (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <img
@@ -17,7 +18,7 @@ const ArticleCard = ({$id, title, content}) => {
                     <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full uppercase font-semibold tracking-wide">
                         Article
                     </span>
-                    <span className="ml-3 text-sm text-gray-500">5 min read</span>
+                    <span className="ml-3 text-sm text-gray-500">{Math.ceil(content.length / 1000)} min read</span>
                 </div>
                 <h3 className="mt-3 text-xl font-semibold text-gray-900 hover:text-blue-600">
                     <Link to={`/article/${$id}`}>{ title }</Link>
@@ -32,8 +33,8 @@ const ArticleCard = ({$id, title, content}) => {
                         alt="Author"
                     />
                     <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">author</p>
-                        <p className="text-xs text-gray-500">Oct 20, 2025</p>
+                        <p className="text-sm font-medium text-gray-900">{author_name || ''}</p>
+                        <p className="text-xs text-gray-500">{formatDate($createdAt)}</p>
                     </div>
                 </div>
             </div>
