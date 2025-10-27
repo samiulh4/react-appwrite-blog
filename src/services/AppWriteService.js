@@ -1,5 +1,6 @@
 import conf from "../settings/conf";
 import { Client, Account, ID, Storage, Databases, Query } from "appwrite";
+import { processImage } from "../utils/imageUtils";
 
 export class AppWriteService {
     client = new Client();
@@ -60,14 +61,16 @@ export class AppWriteService {
     async createPost({ title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
-            /*if (featured_image) {
+            if (featured_image) {
+                // Process the image before upload
+                const processedImage = await processImage(featured_image, 80);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
-                    featured_image
+                    processedImage
                 );
                 imageId = uploadedFile.$id;
-            }*/
+            }
             const post = await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -104,14 +107,29 @@ export class AppWriteService {
     async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
+            
+            // First get the current article to check its image
+            const currentArticle = await this.getArticle(id);
+            const currentImageId = currentArticle.featured_image;
+
             if (featured_image && typeof featured_image !== 'string') {
-                // Only upload if it's a new file
+                // Process and upload new image
+                const processedImage = await processImage(featured_image);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
-                    featured_image
+                    processedImage
                 );
                 imageId = uploadedFile.$id;
+                
+                // Delete the previous image if it exists
+                if (currentImageId) {
+                    try {
+                        await this.storage.deleteFile(conf.appwriteBucketId, currentImageId);
+                    } catch (error) {
+                        console.warn("Failed to delete previous image:", error);
+                    }
+                }
             } else {
                 imageId = featured_image; // Keep existing image ID
             }
@@ -131,7 +149,6 @@ export class AppWriteService {
 
             return post;
         } catch (error) {
-            console.error("Error updating article:", error);
             throw error;
         }
     }
