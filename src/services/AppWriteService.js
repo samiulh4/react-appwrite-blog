@@ -1,5 +1,5 @@
 import conf from "../settings/conf";
-import { Client, Account, ID, Storage, Databases, Query } from "appwrite";
+import { Client, Account, ID, Storage, Databases, Query, Avatars } from "appwrite";
 import { processImage } from "../utils/imageUtils";
 
 export class AppWriteService {
@@ -129,7 +129,7 @@ export class AppWriteService {
     async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
-            
+
             // First get the current article to check its image
             const currentArticle = await this.getArticle(id);
             const currentImageId = currentArticle.featured_image;
@@ -143,7 +143,7 @@ export class AppWriteService {
                     processedImage
                 );
                 imageId = uploadedFile.$id;
-                
+
                 // Delete the previous image if it exists
                 if (currentImageId) {
                     try {
@@ -216,6 +216,62 @@ export class AppWriteService {
         if (!fileId) return null;
         return this.storage.getFileView(conf.appwriteBucketId, fileId);
     }
+
+    // Generate avatar (from initials or email)
+    getAvatar(emailOrName) {
+        try {
+            const avatars = new Avatars(this.client);
+            return avatars.getInitials(emailOrName).href;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // Update user's name
+    async updateName(name) {
+        try {
+            return await this.account.updateName(name);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Upload avatar and store in user prefs
+    async updateAvatar(file) {
+        try {
+            // Step 1: Get user preferences (to check if previous avatar exists)
+            const prefs = await this.account.getPrefs();
+            const previousAvatarId = prefs.avatarId;
+
+            // Step 2: Upload new avatar file
+            const uploaded = await this.storage.createFile(
+                conf.appwriteBucketId,
+                ID.unique(),
+                file
+            );
+
+            // Step 3: Save the new avatar ID in user preferences
+            await this.account.updatePrefs({
+                avatarId: uploaded.$id
+            });
+
+            // Step 4: Delete the old avatar (if it exists)
+            if (previousAvatarId) {
+                try {
+                    await this.storage.deleteFile(conf.appwriteBucketId, previousAvatarId);
+                    console.log("Old avatar deleted successfully");
+                } catch (err) {
+                    console.warn("Failed to delete previous avatar:", err);
+                }
+            }
+
+            return uploaded;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 }
 
 const appWriteService = new AppWriteService();

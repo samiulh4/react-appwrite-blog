@@ -9,18 +9,26 @@ const Header = () => {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authUserName, setAuthUserName] = useState('');
+    const [authAvatarUrl, setAuthAvatarUrl] = useState(null);
 
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             const currentUser = await appWriteService.getCurrentUser();
             if (currentUser) {
                 setIsLoggedIn(true);
-                setAuthUserName(currentUser.name || 'User');
+                setAuthUserName(currentUser.name || 'Not Found !');
+                if (currentUser.prefs?.avatarId) {
+                    const view = appWriteService.getFileView(currentUser.prefs.avatarId);
+                    setAuthAvatarUrl(view.href);
+                } else {
+                    const avatar = appWriteService.getAvatar(currentUser.email || currentUser.name);
+                    setAuthAvatarUrl(avatar);
+                }
             }
 
         };
         checkUserLoggedIn();
-    }, [isLoggedIn])
+    }, [navigate])
 
     return (
         <header className="bg-white shadow-lg">
@@ -54,7 +62,7 @@ const Header = () => {
                                 >
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                         <img
-                                            src={userImage}
+                                            src={authAvatarUrl || userImage}
                                             alt="User Profile"
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
