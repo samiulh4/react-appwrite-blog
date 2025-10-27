@@ -42,12 +42,34 @@ export class AppWriteService {
                     await this.logout();
                     return null;
                 }
-                return currentUser;
+                // Get user preferences including avatar
+                try {
+                    const prefs = await this.account.getPrefs();
+                    return { ...currentUser, prefs };
+                } catch (error) {
+                    return currentUser;
+                }
             }
         } catch (error) {
             return null;
         }
         return null;
+    }
+
+    async updateUserPrefs(prefs) {
+        try {
+            return await this.account.updatePrefs(prefs);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updatePhone(phone, password) {
+        try {
+            return await this.account.updatePhone(phone, password);
+        } catch (error) {
+            throw error;
+        }
     }
 
     async logout() {
