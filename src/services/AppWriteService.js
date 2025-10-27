@@ -104,7 +104,7 @@ export class AppWriteService {
     async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
-            /*if (featured_image && typeof featured_image !== 'string') {
+            if (featured_image && typeof featured_image !== 'string') {
                 // Only upload if it's a new file
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
@@ -114,8 +114,8 @@ export class AppWriteService {
                 imageId = uploadedFile.$id;
             } else {
                 imageId = featured_image; // Keep existing image ID
-            }*/
-            
+            }
+
             const post = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -153,7 +153,7 @@ export class AppWriteService {
         }
     }
 
-    async getArticle(id){
+    async getArticle(id) {
         try {
             return await this.databases.getDocument(
                 conf.appwriteDatabaseId,
@@ -165,11 +165,17 @@ export class AppWriteService {
         }
     }
 
+    // This method work on paid plan
     getFilePreview(fileId) {
         return this.storage.getFilePreview(
             conf.appwriteBucketId,
             fileId
         )
+    }
+
+    getFileView(fileId) {
+        if (!fileId) return null;
+        return this.storage.getFileView(conf.appwriteBucketId, fileId);
     }
 }
 
