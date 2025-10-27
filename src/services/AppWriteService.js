@@ -63,7 +63,7 @@ export class AppWriteService {
             let imageId = null;
             if (featured_image) {
                 // Process the image before upload
-                const processedImage = await processImage(featured_image, 80);
+                const processedImage = await processImage(featured_image, 100);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
@@ -114,7 +114,7 @@ export class AppWriteService {
 
             if (featured_image && typeof featured_image !== 'string') {
                 // Process and upload new image
-                const processedImage = await processImage(featured_image);
+                const processedImage = await processImage(featured_image, 200);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
