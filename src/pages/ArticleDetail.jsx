@@ -24,6 +24,7 @@ const ArticleDetail = () => {
                 
                 if (articleResponse) {
                     setArticle(articleResponse);
+                    console.log(appWriteService.getFileView(articleResponse.featured_image));
                 }
                 if (userResponse) {
                     setCurrentUser(userResponse);
@@ -93,7 +94,7 @@ const ArticleDetail = () => {
                 <div className="mb-8">
                     <img
                         className="w-full h-[28rem] object-cover rounded-xl"
-                        src={CoverImage}
+                        src={appWriteService.getFileView(article.featured_image) || CoverImage}
                         alt="Featured"
                     />
                 </div>

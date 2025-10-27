@@ -9,18 +9,26 @@ const Header = () => {
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authUserName, setAuthUserName] = useState('');
+    const [authAvatarUrl, setAuthAvatarUrl] = useState(null);
 
     useEffect(() => {
         const checkUserLoggedIn = async () => {
             const currentUser = await appWriteService.getCurrentUser();
             if (currentUser) {
                 setIsLoggedIn(true);
-                setAuthUserName(currentUser.name || 'User');
+                setAuthUserName(currentUser.name || 'Not Found !');
+                if (currentUser.prefs?.avatarId) {
+                    const view = appWriteService.getFileView(currentUser.prefs.avatarId);
+                    setAuthAvatarUrl(view.href);
+                } else {
+                    const avatar = appWriteService.getAvatar(currentUser.email || currentUser.name);
+                    setAuthAvatarUrl(avatar);
+                }
             }
 
         };
         checkUserLoggedIn();
-    }, [isLoggedIn])
+    }, [navigate])
 
     return (
         <header className="bg-white shadow-lg">
@@ -54,7 +62,7 @@ const Header = () => {
                                 >
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                         <img
-                                            src={userImage}
+                                            src={authAvatarUrl || userImage}
                                             alt="User Profile"
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
@@ -65,15 +73,10 @@ const Header = () => {
 
                                 {isUserMenuOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
-                                        <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             Your Profile
-                                        </a>
-                                        <a href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Dashboard
-                                        </a>
-                                        <a href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Settings
-                                        </a>
+                                        </Link>
+                                        {/* Settings page can be implemented later */}
                                         <div className="border-t border-gray-100"></div>
                                         <button
                                             onClick={async () => {

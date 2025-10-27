@@ -1,5 +1,6 @@
 import conf from "../settings/conf";
-import { Client, Account, ID, Storage, Databases, Query } from "appwrite";
+import { Client, Account, ID, Storage, Databases, Query, Avatars } from "appwrite";
+import { processImage } from "../utils/imageUtils";
 
 export class AppWriteService {
     client = new Client();
@@ -41,12 +42,34 @@ export class AppWriteService {
                     await this.logout();
                     return null;
                 }
-                return currentUser;
+                // Get user preferences including avatar
+                try {
+                    const prefs = await this.account.getPrefs();
+                    return { ...currentUser, prefs };
+                } catch (error) {
+                    return currentUser;
+                }
             }
         } catch (error) {
             return null;
         }
         return null;
+    }
+
+    async updateUserPrefs(prefs) {
+        try {
+            return await this.account.updatePrefs(prefs);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updatePhone(phone, password) {
+        try {
+            return await this.account.updatePhone(phone, password);
+        } catch (error) {
+            throw error;
+        }
     }
 
     async logout() {
@@ -60,14 +83,16 @@ export class AppWriteService {
     async createPost({ title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
-            /*if (featured_image) {
+            if (featured_image) {
+                // Process the image before upload
+                const processedImage = await processImage(featured_image, 100);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
-                    featured_image
+                    processedImage
                 );
                 imageId = uploadedFile.$id;
-            }*/
+            }
             const post = await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -104,18 +129,33 @@ export class AppWriteService {
     async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
         try {
             let imageId = null;
-            /*if (featured_image && typeof featured_image !== 'string') {
-                // Only upload if it's a new file
+
+            // First get the current article to check its image
+            const currentArticle = await this.getArticle(id);
+            const currentImageId = currentArticle.featured_image;
+
+            if (featured_image && typeof featured_image !== 'string') {
+                // Process and upload new image
+                const processedImage = await processImage(featured_image, 200);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
-                    featured_image
+                    processedImage
                 );
                 imageId = uploadedFile.$id;
+
+                // Delete the previous image if it exists
+                if (currentImageId) {
+                    try {
+                        await this.storage.deleteFile(conf.appwriteBucketId, currentImageId);
+                    } catch (error) {
+                        console.warn("Failed to delete previous image:", error);
+                    }
+                }
             } else {
                 imageId = featured_image; // Keep existing image ID
-            }*/
-            
+            }
+
             const post = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -131,7 +171,6 @@ export class AppWriteService {
 
             return post;
         } catch (error) {
-            console.error("Error updating article:", error);
             throw error;
         }
     }
@@ -153,7 +192,7 @@ export class AppWriteService {
         }
     }
 
-    async getArticle(id){
+    async getArticle(id) {
         try {
             return await this.databases.getDocument(
                 conf.appwriteDatabaseId,
@@ -165,12 +204,74 @@ export class AppWriteService {
         }
     }
 
+    // This method work on paid plan
     getFilePreview(fileId) {
         return this.storage.getFilePreview(
             conf.appwriteBucketId,
             fileId
         )
     }
+
+    getFileView(fileId) {
+        if (!fileId) return null;
+        return this.storage.getFileView(conf.appwriteBucketId, fileId);
+    }
+
+    // Generate avatar (from initials or email)
+    getAvatar(emailOrName) {
+        try {
+            const avatars = new Avatars(this.client);
+            return avatars.getInitials(emailOrName).href;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    // Update user's name
+    async updateName(name) {
+        try {
+            return await this.account.updateName(name);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Upload avatar and store in user prefs
+    async updateAvatar(file) {
+        try {
+            // Step 1: Get user preferences (to check if previous avatar exists)
+            const prefs = await this.account.getPrefs();
+            const previousAvatarId = prefs.avatarId;
+
+            // Step 2: Upload new avatar file
+            const uploaded = await this.storage.createFile(
+                conf.appwriteBucketId,
+                ID.unique(),
+                file
+            );
+
+            // Step 3: Save the new avatar ID in user preferences
+            await this.account.updatePrefs({
+                avatarId: uploaded.$id
+            });
+
+            // Step 4: Delete the old avatar (if it exists)
+            if (previousAvatarId) {
+                try {
+                    await this.storage.deleteFile(conf.appwriteBucketId, previousAvatarId);
+                    console.log("Old avatar deleted successfully");
+                } catch (err) {
+                    console.warn("Failed to delete previous avatar:", err);
+                }
+            }
+
+            return uploaded;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 }
 
 const appWriteService = new AppWriteService();
