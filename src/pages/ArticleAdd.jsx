@@ -1,18 +1,22 @@
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import appWriteService from '../services/AppWriteService';
 import { showLoadingAlert, closeLoadingAlert, showSuccessAlert, showErrorAlert } from '../utils/sweetAlert';
+import Input from '../components/Input';
 
 const ArticleAdd = () => {
+    const titleRef = useRef();
     const navigate = useNavigate();
     const [currentUserId, setCurrentUserId] = useState(null);
     const [currentUserName, setCurrentUserName] = useState('');
+    const [currentUserAvatarId, setCurrentUserAvatarId] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         user_id: '',
         featured_image: null,
-        author_name: ''
+        author_name: '',
+        author_avatar_id: ''
     });
 
     useEffect(() => {
@@ -21,6 +25,9 @@ const ArticleAdd = () => {
             if (currentUser) {
                 setCurrentUserId(currentUser.$id);
                 setCurrentUserName(currentUser.name || '');
+                if(currentUser.prefs?.avatarId) {
+                    setCurrentUserAvatarId(currentUser.prefs.avatarId);
+                }
             } else {
                 navigate('/signin');
             }
@@ -49,11 +56,12 @@ const ArticleAdd = () => {
 
         try {
             showLoadingAlert('Loading...');
-
+            
             const post = await appWriteService.createPost({
                 ...formData,
                 user_id: currentUserId,
-                author_name: currentUserName
+                author_name: currentUserName,
+                author_avatar_id: currentUserAvatarId
             });
 
             closeLoadingAlert();
@@ -71,22 +79,15 @@ const ArticleAdd = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Title */}
-                <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                        Title
-                    </label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                        placeholder="Enter post title"
-                    />
-                </div>
-
+                <Input 
+                    label="Title"
+                    placeholder="Enter article title"
+                    ref={titleRef}
+                    onChange={handleChange}
+                    value={formData.title}
+                    name="title"
+                />
+                
                 {/* Content */}
                 <div>
                     <label htmlFor="content" className="block text-sm font-medium text-gray-700">

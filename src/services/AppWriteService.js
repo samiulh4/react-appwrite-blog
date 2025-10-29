@@ -80,7 +80,7 @@ export class AppWriteService {
         }
     }
 
-    async createPost({ title, content, featured_image, user_id, author_name }) {
+    async createPost({ title, content, featured_image, user_id, author_name, author_avatar_id }) {
         try {
             let imageId = null;
             if (featured_image) {
@@ -102,7 +102,8 @@ export class AppWriteService {
                     content,
                     featured_image: imageId,
                     user_id,
-                    author_name
+                    author_name,
+                    author_avatar_id
                 }
             );
 
@@ -126,7 +127,7 @@ export class AppWriteService {
         }
     }
 
-    async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
+    async updateArticle(id, { title, content, featured_image, user_id, author_name, author_avatar_id }) {
         try {
             let imageId = null;
 
@@ -165,7 +166,8 @@ export class AppWriteService {
                     content,
                     featured_image: imageId,
                     user_id,
-                    author_name
+                    author_name,
+                    author_avatar_id
                 }
             );
 
@@ -180,7 +182,7 @@ export class AppWriteService {
             const finalQueries = [
                 ...queries,
                 Query.limit(10),
-                Query.orderDesc("$updatedAt")
+                Query.orderDesc("$createdAt")
             ];
             return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
