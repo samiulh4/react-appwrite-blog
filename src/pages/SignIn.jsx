@@ -2,11 +2,14 @@ import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import appWriteService from '../services/AppWriteService';
+import {setAuthData} from '../store/authSlice';
+import {useDispatch} from 'react-redux';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,7 +30,8 @@ const SignIn = () => {
             if (session) {
                 const currentUser = await appWriteService.getCurrentUser();
                 if (currentUser) {
-                    navigate("/");
+                    dispatch(setAuthData(currentUser));
+                    navigate("/profile");
                 } else {
                     await Swal.fire({
                         icon: 'error',

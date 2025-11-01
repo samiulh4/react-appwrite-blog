@@ -3,16 +3,23 @@ import { Link, useNavigate } from 'react-router-dom';
 import appWriteService from '../../services/AppWriteService';
 import { showConfirmDialog, showSuccessAlert, showErrorAlert } from '../../utils/sweetAlert';
 import userImage from '../../assets/user.png';
+import { clearAuthData } from '../../store/authSlice';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
-    const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authUserName, setAuthUserName] = useState('');
     const [authAvatarUrl, setAuthAvatarUrl] = useState(null);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+    const authData = useSelector((state) => state.auth.authData);
+   
 
-    useEffect(() => {
+    /*useEffect(() => {
         const checkUserLoggedIn = async () => {
+            console.log('Auth Data from Redux:', authData);
             const currentUser = await appWriteService.getCurrentUser();
             if (currentUser) {
                 setIsLoggedIn(true);
@@ -28,8 +35,9 @@ const Header = () => {
 
         };
         checkUserLoggedIn();
-    }, [navigate])
+    }, [navigate])*/
 
+    
     return (
         <header className="bg-white shadow-lg">
             <nav className="container mx-auto px-4 py-4">
@@ -43,13 +51,13 @@ const Header = () => {
                     <div className="hidden md:flex space-x-6">
                         <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
                         <Link to="/about" className="text-gray-600 hover:text-gray-900">About</Link>
-                        {isLoggedIn && (
+                        {isAuthenticated && (
                             <Link to="/article/add" className="text-blue-600 hover:text-blue-900">New Article</Link>
                         )}
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        {!isLoggedIn ? (
+                        {!isAuthenticated ? (
                             <>
                                 <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signin">Sign In</Link>
                                 <Link className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-900" to="/signup">Sign Up</Link>
@@ -62,12 +70,12 @@ const Header = () => {
                                 >
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center">
                                         <img
-                                            src={authAvatarUrl || userImage}
+                                            src={appWriteService.getFileView(authData.prefs.avatarId) || appWriteService.getAvatar(authData.email || authData.name) || userImage}
                                             alt="User Profile"
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
                                     </div>
-                                    <span className="text-gray-700">{authUserName}</span>
+                                    <span className="text-gray-700">{authData?.name}</span>
 
                                 </button>
 
@@ -88,6 +96,7 @@ const Header = () => {
                                                     try {
                                                         await appWriteService.logout();
                                                         await showSuccessAlert('Success', 'Signed out successfully');
+                                                        dispatch(clearAuthData());
                                                         navigate('/signin');
                                                     } catch (error) {
                                                         showErrorAlert('Error', 'Failed to sign out');
