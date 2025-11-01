@@ -9,7 +9,6 @@ const Home = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       const articleData = await appWriteService.getArticles([]);
-      console.log("Articles Data:", articleData);
       setArticles(articleData.documents);
     }
     fetchArticles();

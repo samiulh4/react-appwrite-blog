@@ -80,12 +80,12 @@ export class AppWriteService {
         }
     }
 
-    async createPost({ title, content, featured_image, user_id, author_name }) {
+    async createPost({ title, content, featured_image, user_id, author_name, author_avatar_id }) {
         try {
             let imageId = null;
             if (featured_image) {
                 // Process the image before upload
-                const processedImage = await processImage(featured_image, 100);
+                const processedImage = await processImage(featured_image, 300);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
@@ -102,7 +102,8 @@ export class AppWriteService {
                     content,
                     featured_image: imageId,
                     user_id,
-                    author_name
+                    author_name,
+                    author_avatar_id
                 }
             );
 
@@ -126,7 +127,7 @@ export class AppWriteService {
         }
     }
 
-    async updateArticle(id, { title, content, featured_image, user_id, author_name }) {
+    async updateArticle(id, { title, content, featured_image, user_id, author_name, author_avatar_id }) {
         try {
             let imageId = null;
 
@@ -136,7 +137,7 @@ export class AppWriteService {
 
             if (featured_image && typeof featured_image !== 'string') {
                 // Process and upload new image
-                const processedImage = await processImage(featured_image, 200);
+                const processedImage = await processImage(featured_image, 300);
                 const uploadedFile = await this.storage.createFile(
                     conf.appwriteBucketId,
                     ID.unique(),
@@ -165,7 +166,8 @@ export class AppWriteService {
                     content,
                     featured_image: imageId,
                     user_id,
-                    author_name
+                    author_name,
+                    author_avatar_id
                 }
             );
 
@@ -180,7 +182,7 @@ export class AppWriteService {
             const finalQueries = [
                 ...queries,
                 Query.limit(10),
-                Query.orderDesc("$updatedAt")
+                Query.orderDesc("$createdAt")
             ];
             return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
@@ -239,23 +241,19 @@ export class AppWriteService {
     // Upload avatar and store in user prefs
     async updateAvatar(file) {
         try {
-            // Step 1: Get user preferences (to check if previous avatar exists)
             const prefs = await this.account.getPrefs();
             const previousAvatarId = prefs.avatarId;
 
-            // Step 2: Upload new avatar file
             const uploaded = await this.storage.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
                 file
             );
 
-            // Step 3: Save the new avatar ID in user preferences
             await this.account.updatePrefs({
                 avatarId: uploaded.$id
             });
 
-            // Step 4: Delete the old avatar (if it exists)
             if (previousAvatarId) {
                 try {
                     await this.storage.deleteFile(conf.appwriteBucketId, previousAvatarId);

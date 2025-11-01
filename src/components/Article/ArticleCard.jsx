@@ -5,7 +5,7 @@ import appWriteService from '../../services/AppWriteService';
 import { formatDate } from '../../utils/dateFormat';
 
 
-const ArticleCard = ({$id, title, content, author_name, featured_image, $createdAt}) => {
+const ArticleCard = ({$id, title, content, author_name, featured_image, $createdAt, author_avatar_id}) => {
     return (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <img
@@ -29,7 +29,7 @@ const ArticleCard = ({$id, title, content, author_name, featured_image, $created
                 <div className="mt-4 flex items-center">
                     <img
                         className="h-8 w-8 rounded-full object-cover"
-                        src={UserImage}
+                        src={appWriteService.getFileView(author_avatar_id) || UserImage}
                         alt="Author"
                     />
                     <div className="ml-3">

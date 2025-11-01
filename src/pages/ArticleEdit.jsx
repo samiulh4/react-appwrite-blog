@@ -8,12 +8,14 @@ const ArticleEdit = () => {
     const { id } = useParams();
     const [currentUserId, setCurrentUserId] = useState(null);
     const [currentUserName, setCurrentUserName] = useState('');
+    const [currentUserAvatarId, setCurrentUserAvatarId] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        user_id: '',
         featured_image: null,
-        author_name: ''
+        user_id: '',
+        author_name: '',
+        author_avatar_id: ''
     });
 
     useEffect(() => {
@@ -28,6 +30,9 @@ const ArticleEdit = () => {
                 
                 setCurrentUserId(currentUser.$id);
                 setCurrentUserName(currentUser.name || '');
+                if(currentUser.prefs?.avatarId) {
+                    setCurrentUserAvatarId(currentUser.prefs.avatarId);
+                }
 
                 // Load article data
                 const article = await appWriteService.getArticle(id);
@@ -47,9 +52,7 @@ const ArticleEdit = () => {
                 setFormData({
                     title: article.title,
                     content: article.content,
-                    user_id: article.user_id,
-                    featured_image: article.featured_image,
-                    author_name: article.author_name
+                    featured_image: article.featured_image
                 });
             } catch (error) {
                 showErrorAlert('Error', error.message || 'Error loading article');
@@ -85,7 +88,8 @@ const ArticleEdit = () => {
             await appWriteService.updateArticle(id, {
                 ...formData,
                 user_id: currentUserId,
-                author_name: currentUserName
+                author_name: currentUserName,
+                author_avatar_id: currentUserAvatarId
             });
 
             closeLoadingAlert();
